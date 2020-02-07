@@ -1,0 +1,303 @@
+---
+title: 'Patricia: Grupos Funcionales'
+author: "Jorge Cornejo"
+date: "10/25/2018"
+output:
+  html_document:
+    highlight: haddock
+    number_sections: yes
+    theme: flatly
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+  html_notebook: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = T)
+knitr::opts_chunk$set(results = 'asis')
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(fig.width  = 9)
+knitr::opts_chunk$set(fig.height = 6)
+```
+
+**Install rFishBase package**: This only need to be done once.
+```{r eval=F}
+remotes::install_github("ropensci/rfishbase")
+```
+
+```{r echo=F, warning=FALSE, results='hide', message=F}
+rm(list=ls())
+library(readxl)
+library(dplyr)
+library(tidyr)
+library(DT)
+require(rfishbase)
+require(FD) #This calculates functional diversity
+```
+
+
+# Read data and obtain Species Names
+
+## Data in Capturas
+
+```{r}
+capturas <- read_excel('Data/Solicitud Patricia Faundez AH002T0002612.xlsx', sheet = 'Capturas')
+
+spNames <- capturas %>% 
+  select(comun, cientifico) %>% 
+  dplyr::group_by(comun, cientifico) %>% 
+  dplyr::summarise(n=n())
+
+datatable(head(spNames))
+```
+
+## Especies Consideradas
+
+```{r}
+spp <- read_excel('Data/Solicitud Patricia Faundez AH002T0002612.xlsx', sheet = 'Especies consideradas')
+
+spp <- spp %>% 
+  select(COD_ESP, nombre_común, simbolo)
+  
+names(spp) <- c("COD_ESP", "nombre_comun", "simbolo" )
+
+datatable(head(spp))
+```
+
+## Merge the tables
+
+```{r}
+spp <- left_join(spp, spNames, by=c("nombre_comun"="comun"))
+datatable(spp)
+```
+
+## Get information from FishBase
+
+Fist we remove the non-fishes species. 
+
+~~Then we replace the species name **_Granadero aconcagua_** for **_Coelorinchus aconcagua_**, which is the names that it is in FishBase.~~
+
+```{r}
+spp <- spp %>%
+            filter(!COD_ESP %in% c(48, 52, 561, 35, 136, 135, 132, 874))
+```
+
+
+```{r cache=TRUE}
+fishbaseInfo <- species(spp$cientifico)
+fishbaseInfo <- left_join(spp, fishbaseInfo, by=c("cientifico"="Species"))
+temp <- ecology(spp$cientifico, fields=c("SpecCode", "DietTroph")) %>% 
+    rename(TL=DietTroph)
+fishbaseInfo <- left_join(fishbaseInfo, temp, by=c("SpecCode"="SpecCode"))
+
+datatable(fishbaseInfo[1:5,1:15])
+```
+
+## Cleanup the columns
+
+```{r}
+fishbaseInfo <- fishbaseInfo %>%
+              select(-n, -SpeciesRefNo, -FBname, -PicPreferredName, -PicPreferredNameM, -PicPreferredNameF,
+               -PicPreferredNameJ, -Source, -AuthorRef, -Remark, -TaxIssue, -Fresh, -Brack, -Saltwater, -MigratRef,
+               -Pic, -PictureFemale, -LarvaPic, -EggPic, -PriceCateg, -PriceReliability, -Remarks7, -UsedasBait, -BaitRef,
+               -Aquarium, -AquariumFishII, -AquariumRef, -GameFish, -GameRef, -Dangerous, -DangerousRef, -Electrogenic,
+               -ElectroRef, -Complete, -GoogleImage, -Emblematic, -Entered, -DateEntered, -Modified, -DateModified,
+               -Expert, -DateChecked, -TS)
+```
+
+## Write a CSV file
+```{r}
+write.csv(fishbaseInfo, file="Data/Derived/Species.csv")
+```
+
+# Funcionatal diversity
+
+## Clean data from before
+
+And then read the data and keep only the traits of interest.
+```{r}
+#rm(list=ls())
+data <- read.csv(file="Data/Derived/Species.csv")
+cData <- data %>% 
+  select(cientifico, TL, DemersPelag, DepthRangeShallow, DepthRangeDeep, Length, BodyShapeI) %>% 
+  arrange(cientifico) %>% 
+  filter(cientifico != "Coelorhynchus aconcagua")
+row.names(cData) <- cData$cientifico
+
+capturas <- read_excel('Data/Solicitud Patricia Faundez AH002T0002612.xlsx', sheet = 'Capturas')
+```
+
+## Sum catches by Species and Year
+
+```{r}
+yearCatch <- capturas %>% 
+  separate(proy, c("year", "nn"), sep="-", remove = F) %>% 
+  separate(year, c("year", "nn"), sep="_", remove = F) %>% 
+  mutate(year = as.numeric(year)) %>% 
+  mutate(year = ifelse(year>1000, year, year+1900)) %>% 
+  group_by(year, cientifico) %>% 
+  summarise(totalCatch_kg = sum(captkg, na.rm=T)) %>% 
+  filter(cientifico %in% cData$cientifico) %>% 
+  arrange(cientifico, year)
+```
+
+## Turn into Wide format
+
+### Abundance Matrix
+This values are calculates as the sum of catches by species on a giver year.
+Then year is turn int a **row.name** and is drop from the columns.
+
+_Coelorhynchus aconcagua_ does not have any data, so we remove it from the table.
+
+```{r results="html"}
+
+abundances <- yearCatch %>% 
+  filter(cientifico != "Coelorhynchus aconcagua") %>% 
+  spread(cientifico, totalCatch_kg)
+
+row.names(abundances) <- abundances$year
+abundances <-  abundances[,-1] %>% 
+  replace(., is.na(.), 0)
+
+cData <- select(cData, -cientifico)
+write.csv(cData, file="Data/Derived/TraitsSP.csv")
+print(row.names(cData))
+```
+
+## FD of the species 
+
+
+```{r}
+test <- dbFD(cData, cor = "cailliez", a=abundances) #, cor="cailliez")
+datatable(data.frame(test[1:8]))
+datatable(test$CWM)
+```
+
+
+# Now working with Chilean Landings
+
+## Load and keep only Bottom Trawling
+```{r cache=TRUE}
+landings <- read.csv(file="Data/Industrial_Chile.csv", stringsAsFactors = F)
+```
+
+```{r}
+trawling <- landings %>% 
+  filter(gear == "ARRASTRE") %>% 
+  group_by(year, stock) %>% 
+  summarise(totalCatch = sum(landings, na.rm=T))
+```
+
+Now prepare the **spNames** _dataset_ to get spepecies names for the species on **trawling** _dataset_.
+
+```{r}
+spNames <- spNames %>% 
+  mutate(common=toupper(comun))
+```
+
+Merge **speNames** with **trawling** to add Species names.
+
+```{r}
+
+spTrawling <- landings %>% 
+  filter(gear == "ARRASTRE") %>% 
+  group_by(stock) %>% 
+  summarise(n = n()) %>% 
+  separate(stock, c("comun1", "comun2"), sep = " O ") %>% 
+  separate(comun1, c("comun1", "comun3"), sep = " / ") %>% 
+  mutate(comun2=ifelse(!is.na(comun2), comun2, comun3)) %>% 
+  select(-comun3, n)
+
+
+spTrawling <- left_join(spTrawling, spNames, by=c("comun1"="common"))
+spTrawling <- left_join(spTrawling, spNames, by=c("comun2"="common"))
+
+spTrawling <- spTrawling %>% 
+  mutate(spName = ifelse(!is.na(cientifico.x), cientifico.x, cientifico.y)) %>% 
+  rename(common = comun1) %>% 
+  select(common, spName)
+
+spTrawling$spName <- ifelse(spTrawling$common ==  "MERLUZA COMUN", "Merluccius gayi gayi", spTrawling$spName)
+```
+
+There are many species **without** scientific names. I will move on for now, removing them!!
+
+```{r}
+spTrawlingWithScName <- spTrawling %>% 
+  filter(!is.na(spName))
+```
+
+## Get data from FishBase
+
+### Traits Table
+
+Get FishBase data and then drop those that are not fishes of FB does not have data on them.
+Finally we only keep the columns that are needed for the analysis.
+
+This table are the input **traits** to the _FD_ functions.
+```{r cache=TRUE}
+fbSpTrawling <- species(spTrawlingWithScName$spName)
+
+fbSpTrawling <- cbind(spTrawlingWithScName, fbSpTrawling)
+
+fbSpTrawling$TL <- ecology(fbSpTrawling$spName, fields=c("DietTroph"))$DietTroph  ## This get the Trophic Level from FB
+
+
+fbSpTrawling <- fbSpTrawling %>% 
+  select(spName, TL, DemersPelag, DepthRangeShallow, DepthRangeDeep, Length, BodyShapeI) %>% 
+  filter(!spName %in% c("Loligo gahi", "Rapana (Chorus) giganteus", "Lithodes santolla", "Haliporoides diomedeae", 
+                         "Homolaspis plana", "Mursia gaudichaudii", "Dosidicus gigas", "Cervimunida johni",
+                         "Pleuroncodes monodon", "Enteroctupus megalociathus")) %>% 
+  arrange(spName)
+  
+row.names(fbSpTrawling) <- fbSpTrawling$spName
+traits <- fbSpTrawling %>% 
+  select(-spName)
+
+datatable(traits)
+```
+
+### Now format the landings
+
+Remove all the stock whitout a Scientific name!
+
+```{r}
+trawling2 <- left_join(trawling, spTrawlingWithScName, by=c("stock"="common"))
+abundances <- trawling2 %>% 
+  filter(!is.na(spName), spName %in% row.names(traits)) %>% 
+  select(-stock) %>% 
+  spread(spName, totalCatch)
+
+row.names(abundances) <- abundances$year
+abundances <-  abundances[,-1] %>% 
+  replace(., is.na(.), 0)
+```
+
+# FD derived from landings
+
+For some weir reason there are more species on traits than on abundances. I'm removing
+all species that are not in abundances table.
+
+```{r}
+traits$sp <- row.names(traits)
+traits <- traits %>% 
+  filter(sp %in% names(abundances)) 
+
+traits <- traits %>% 
+  mutate(DemersPelag = as.factor(DemersPelag), BodyShapeI = as.factor(BodyShapeI ))
+
+row.names(traits) <- traits$sp
+
+traits <- select(traits, -sp)
+write.csv(traits, file="Data/Derived/Traits_Catches.csv")
+```
+
+
+```{r}
+test <- dbFD(traits, cor = "cailliez", a=abundances) 
+datatable(data.frame(test[1:8]))
+datatable(test$CWM)
+```
+
