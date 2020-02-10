@@ -1,0 +1,263 @@
+,comun,cientifico,n
+1,"Anchovy, deepbody",Anchoa compressa,1
+2,"Anchovy, northern",Engraulis mordax,12
+3,"Barracuda, California",Sphyraena argentea,12
+4,"Bass, barred sand",Stereolepis gigas,3
+5,"Bass, giant sea",Stereolepis gigas,12
+6,"Bass, kelp",Paralabrax clathratus,5
+7,"Bass, spotted sand",Paralabrax maculatofasciatus,1
+8,"Blackfish, Sacramento",Orthodon microlepidotus,1
+9,Blacksmith,Chromis punctipinnis,9
+10,"Bonito, Pacific",Sarda chiliensis,12
+11,"Bullhead, brown",Ameiurus nebulosus,3
+12,Butterfish (Pacific pompano,Peprilus simillimus,4
+13,Butterfish (Pacific pompano),Peprilus simillimus,1
+14,Butterfish (Pacific pompano)..,Peprilus simillimus,4
+15,Butterfish (Pacific pompano)...,Peprilus simillimus,3
+16,Cabezon,Scorpaenichthys marmoratus,12
+17,Carp,Cyprinus carpio,7
+18,"Cod, Pacific",Gadus macrocephalus,5
+19,"Corbina, California",Menticirrhus undulatus,2
+20,"Corvina, shortfin",Cynoscion parvipinnis,4
+21,"Croaker, black",Cheilotrema saturnum,1
+22,"Croaker, unspecifed",Sciaenidae,8
+23,"Croaker, white",Genyonemus lineatus,12
+24,"Croaker, yellowfin",Genyonemus lineatus,3
+25,Dolphin (fish),Coryphaena hippurus,12
+26,Eel,Osteichthyes,7
+27,"Eel, California moray",Gymnothorax mordax,12
+28,"Eel, monkeyface (pricklebac",Cebidichthys violaceus,4
+29,"Eel, monkeyface (prickleback)",Cebidichthys violaceus,7
+30,"Eel, monkeyface (prickleback)..",Cebidichthys violaceus,1
+31,"Eel, spotted cusk-",Chilara taylori,1
+32,"Eel, wolf (wolf-eel)",Anarrhichthys ocellatus,3
+33,Escolar,Lepidocybium flavobrunneum,12
+34,"Fish, unspecified",Osteichthyes,12
+35,"Flounder, arrowtooth",Atheresthes stomias,12
+36,"Flounder, starry",Platichthys stellatus,12
+37,"Flounder, unspecified",Pleuronectidae,12
+38,Flyingfish,Exocoetidae spp.,7
+39,"Goby, bluebanded",Lythrypnus dalli,1
+40,"Goby, yellowfin",Acanthogobius flavimanus,11
+41,"Greenling, kelp",Hexagrammos decagrammus,12
+42,"Greenling, rock",Hexagrammos lagocephalus,5
+43,Grenadier,Macrouridae,12
+44,Grouper,Mycteroperca / Epinephelus,2
+45,"Grouper, broomtail",Mycteroperca xenarcha,1
+46,"Grunion, California",Leuresthes tenuis,1
+47,"Guitarfish, shovelnose",Rhinobatos productus,12
+48,Hagfishes,Eptatretus spp.,11
+49,Halfmoon,Medialuna californiensis,12
+50,"Halibut, California",Paralichthys californicus,12
+51,"Halibut, Pacific",Hippoglossus stenolepis,7
+52,"Halibut, unspecified",Pleuronectiformes,3
+53,"Herring, Pacific",Clupea pallasi,8
+54,"Herring, Pacific - roe",Clupea pallasi,12
+55,"Herring, Pacific - roe on kel",Clupea/algae,2
+56,"Herring, Pacific - roe on kelp",Clupea/algae,4
+57,"Herring, Pacific - roe on kelp...",Clupea/algae,2
+58,"Jacks, unspecified",Carangidae,3
+59,Jacksmelt,Atherinopsis californiensis,12
+60,"Kelpfish, giant",Heterostichus rostratus,4
+61,Kelpfishes,Gibbonsia spp.,6
+62,"Lamprey, Pacific",Entosphenus tridentatus ,1
+63,Lingcod,Ophiodon elongatus,12
+64,"Lizardfish, California",Synodus lucioceps,12
+65,Louvar,Luvarus imperialis,12
+66,"Mackerel, bullet",Auxis rochei,1
+67,"Mackerel, jack",Trachurus symmetricus,12
+68,"Mackerel, Pacific",Scomber japonicus,12
+69,"Mackerel, unspecified",Scomber / Trachurus,9
+70,"Midshipman, plainfin",Porichthys notatus,10
+71,"Mudsucker, longjaw",Gillichthys mirabilis,6
+72,"Mullet, striped",Mugil cephalus,1
+73,Oilfish,Ruvettus pretiosus,10
+74,Opah,Lampris guttatus,12
+75,Opaleye,Girella nigricans,12
+76,"Pomfret, Pacific",Brama japonica,12
+77,Queenfish,Seriphus politus,8
+78,"Ratfish, spotted",Hydrolagus colliei,10
+79,"Ray, bat",Myliobatis californica,12
+80,"Ray, Pacific electric",Torpedo californica,12
+81,"Ray, unspecified",Rajiformes,12
+82,"Rockfish, aurora",Sebastes aurora,12
+83,"Rockfish, bank",Sebastes rufus,12
+84,"Rockfish, black",Sebastes melanops,12
+85,"Rockfish, black-and-yellow",Sebastes chrysomelas,8
+86,"Rockfish, black-and-yellow.",Sebastes chrysomelas,4
+87,"Rockfish, blackgill",Sebastes melanostomus,12
+88,"Rockfish, blue",Sebastes mystinus,12
+89,"Rockfish, bocaccio",Sebastes paucispinis,12
+90,"Rockfish, bronzespotted",Sebastes gilli,6
+91,"Rockfish, brown",Sebastes auriculatus,12
+92,"Rockfish, calico",Sebastes dallii ,2
+93,"Rockfish, canary",Sebastes pinniger,12
+94,"Rockfish, chameleon",Sebastes phillipsi,4
+95,"Rockfish, chilipepper",Sebastes goodei,12
+96,"Rockfish, China",Sebastes nebulosus,12
+97,"Rockfish, copper",Sebastes caurinus,12
+98,"Rockfish, copper (whitebelly)..",Sebastes caurinus,1
+99,"Rockfish, cowcod",Sebastes levis,10
+100,"Rockfish, darkblotched",Sebastes crameri,12
+101,"Rockfish, flag",Sebastes rubrivinctus,12
+102,"Rockfish, gopher",Sebastes carnatus,12
+103,"Rockfish, grass",Sebastes rastrelliger,12
+104,"Rockfish, greenblotched",Sebastes rosenblatti,12
+105,"Rockfish, greenspotted",Sebastes chlorostictus,12
+106,"Rockfish, greenstriped",Sebastes elongatus,12
+107,"Rockfish, group black/blue",Sebastes/group,3
+108,"Rockfish, group black/blue..",Sebastes/group,1
+109,"Rockfish, group bocaccio/c",Sebastes/group,2
+110,"Rockfish, group bocaccio/chili.",Sebastes/group,1
+111,"Rockfish, group bolina",Sebastes/group,12
+112,"Rockfish, group canary/ver",Sebastes/group,1
+113,"Rockfish, group deep nearshor",Sebastes/group,1
+114,"Rockfish, group deep nearshore.",Sebastes/group,4
+115,"Rockfish, group deepwater reds",Sebastes/group,1
+116,"Rockfish, group deepwater reds..",Sebastes/group,1
+117,"Rockfish, group gopher",Sebastes/group,8
+118,"Rockfish, group nearshore",Sebastes/group,8
+119,"Rockfish, group nearshore...",Sebastes/group,4
+120,"Rockfish, group red",Sebastes/group,12
+121,"Rockfish, group rosefish",Sebastes/group,12
+122,"Rockfish, group shelf",Sebastes/group,12
+123,"Rockfish, group slope",Sebastes/group,12
+124,"Rockfish, group small",Sebastes/group,12
+125,"Rockfish, honeycomb",Sebastes umbrosus,10
+126,"Rockfish, kelp",Sebastes atrovirens,12
+127,"Rockfish, Mexican",Sebastes macdonaldi ,9
+128,"Rockfish, olive",Sebastes serranoides,12
+129,"Rockfish, Pacific ocean per",Sebastes alutus,4
+130,"Rockfish, Pacific ocean perch",Sebastes alutus,4
+131,"Rockfish, Pacific ocean perch.",Sebastes alutus,3
+132,"Rockfish, pink",Sebastes eos,5
+133,"Rockfish, pinkrose",Sebastes simulator,4
+134,"Rockfish, quillback",Sebastes maliger,12
+135,"Rockfish, redbanded",Sebastes babcocki,12
+136,"Rockfish, rosethorn",Sebastes helvomaculatus,12
+137,"Rockfish, rosy",Sebastes rosaceus,12
+138,"Rockfish, shortbelly",Sebastes jordani,9
+139,"Rockfish, speckled",Sebastes ovalis,12
+140,"Rockfish, splitnose",Sebastes diploproa,12
+141,"Rockfish, squarespot",Sebastes hopkinsi,11
+142,"Rockfish, starry",Sebastes constellatus,12
+143,"Rockfish, stripetail",Sebastes saxicola,6
+144,"Rockfish, swordspine",Sebastes ensifer,4
+145,"Rockfish, treefish",Sebastes serriceps,12
+146,"Rockfish, unspecified",Sebastes spp.,12
+147,"Rockfish, vermilion",Sebastes miniatus,12
+148,"Rockfish, widow",Sebastes entomelas,12
+149,"Rockfish, yelloweye",Sebastes ruberrimus,12
+150,"Rockfish, yellowtail",Sebastes flavidus,12
+151,Sablefish,Anoplopoma fimbria,12
+152,Sailfish,Istiophorus platypterus,1
+153,Salmon,Oncorhynchus spp.,5
+154,"Salmon, Chinook",Oncorhynchus tshawytscha,12
+155,"Salmon, chum",Oncorhynchus keta ,1
+156,"Salmon, coho",Oncorhynchus kisutch,1
+157,"Salmon, pink",Oncorhynchus gorbuscha,1
+158,"Salmon, Roe (Chinook and Coh",Oncorhynchus spp.,1
+159,"Salmon, Roe (Chinook and Coho",Oncorhynchus spp.,1
+160,"Salmon, Roe (Chinook, Coho",Oncorhynchus spp.,4
+161,"Salmon, Roe (Chinook, Coho)",Oncorhynchus spp.,3
+162,"Salmon, Roe (Chinook, Coho).",Oncorhynchus spp.,1
+163,Sanddab,Citharichthys spp.,12
+164,"Sanddab, longfin",Citharichthys xanthostigma,3
+165,"Sanddab, Pacific",Citharichthys sordidus,12
+166,"Sanddab, speckled",Citharichthys stigmaeus,2
+167,"Sardine, juvenile",Sardinops sagax caeruleus,2
+168,"Sardine, Pacific",Sardinops sagax caeruleus,12
+169,Sargo,Anisotremus davidsonii,12
+170,"Scorpionfish, California",Scorpaena guttata,12
+171,"Sculpin, staghorn",Leptocottus armatus,12
+172,"Seabass, white",Atractoscion nobilis,12
+173,"Seaperch, striped",Embiotoca lateralis,6
+174,Senorita,Oxyjulis californica,6
+175,"Shad, American",Alosa sapidissima,5
+176,"Shad, threadfin",Dorosoma petenense,7
+177,"Shark, basking",Cetorhinus maximus,1
+178,"Shark, bigeye thresher",Alopias superciliosus,11
+179,"Shark, blacktip",Carcharhinus limbatus,2
+180,"Shark, blue",Prionace glauca,9
+181,"Shark, brown smoothhound",Mustelus henlei,8
+182,"Shark, brown smoothhound.",Mustelus henlei,4
+183,"Shark, gray smoothhound",Mustelus californicus,11
+184,"Shark, horn",Heterodontus francisci,11
+185,"Shark, leopard",Triakis semifasciata,12
+186,"Shark, Pacific angel",Squatina californica,12
+187,"Shark, pelagic thresher",Alopias pelagicus,12
+188,"Shark, salmon",Lamna ditropis,5
+189,"Shark, sevengill",Notorynchus cepedianus,12
+190,"Shark, shortfin mako",Isurus oxyrinchus,12
+191,"Shark, sixgill",Hexanchus griseus,8
+192,"Shark, smooth hammerhead",Sphyrna zygaena,4
+193,"Shark, smooth hammerhead.",Sphyrna zygaena,2
+194,"Shark, smooth hammerhead...",Sphyrna zygaena,1
+195,"Shark, soupfin",Galeorhinus galeus,12
+196,"Shark, spiny dogfish",Squalus acanthias,12
+197,"Shark, swell",Cephaloscyllium ventriosum,11
+198,"Shark, thresher",Alopias vulpinus,12
+199,"Shark, unspecified",Selachii spp.,12
+200,"Shark, white",Carcharodon carcharias,10
+201,"Sharks, cow",Hexanchidae,3
+202,"Sheephead, California",Semicossyphus pulcher,12
+203,Silversides,Atherinidae,5
+204,"Skate, big",Raja binoculata,9
+205,"Skate, California",Raja inornata,5
+206,"Skate, longnose",Beringraja rhina,6
+207,"Skate, thornback",Platyrhinoidis triseriata,9
+208,"Skate, unspecified",Selachii spp. ,12
+209,"Smelt, night",Spirinchus starksi,12
+210,"Smelt, surf",Hypomesus pretiosus,12
+211,"Smelts, true",Osmeridae,8
+212,"Sole, bigmouth",Hippoglossina stomata,2
+213,"Sole, butter",Pleuronectes isolepis,6
+214,"Sole, Dover",Microstomus pacificus,12
+215,"Sole, English",Pleuronectes vetulus,12
+216,"Sole, fantail",Xystreurys liolepis,9
+217,"Sole, petrale",Eopsetta jordani,12
+218,"Sole, rex",Errex zachirus,12
+219,"Sole, rock",Pleuronectes bilineatus,12
+220,"Sole, sand",Psettichthys melanostictus,12
+221,"Sole, slender",Eopsetta exilis,4
+222,"Sole, unspecified",Pleuronectiformes,12
+223,Splittail,Pogonichthys macrolepidotus ,2
+224,"Stickleback, threespine",Gasterosteus aculeatus ,1
+225,Stingray,Dasyatidae,12
+226,"Sunfish, ocean",Mola mola,4
+227,"Surfperch, barred",Amphistichus argenteus,12
+228,"Surfperch, black",Embiotoca jacksoni,12
+229,"Surfperch, calico",Amphistichus koelzi,7
+230,"Surfperch, pile",Rhacochilus vacca,10
+231,"Surfperch, rainbow",Hypsurus caryi,11
+232,"Surfperch, redtail",Amphistichus rhodoterus,12
+233,"Surfperch, rubberlip",Rhacochilus toxotes,12
+234,"Surfperch, shiner",Cymatogaster aggregata,9
+235,"Surfperch, unspecified",Embiotocidae,12
+236,"Surfperch, walleye",Hyperprosopon argenteum,10
+237,"Surfperch, white",Phanerodon furcatus,3
+238,Swordfish,Xiphias gladius,12
+239,"Thornyhead, longspine",Sebastolobus altivelis,12
+240,"Thornyhead, shortspine",Sebastolobus alascanus,12
+241,Thornyheads,Sebastolobus spp.,12
+242,"Tomcod, Pacific",Microgadus proximus,6
+243,Topsmelt,Atherinops affinis,4
+244,"Trawled fish, unspecified",Osteichthyes,5
+245,Triggerfish,Balistidae,5
+246,"Tuna, albacore",Thunnus alalunga,11
+247,"Tuna, bigeye",Thunnus obesus,11
+248,"Tuna, bluefin",Thunnus thynnus,11
+249,"Tuna, skipjack",Katsuwonus pelamis,11
+250,"Tuna, skipjack, black",Euthynnus lineatus,2
+251,"Tuna, unspecified",Scombridae,9
+252,"Tuna, yellowfin",Thunnus albacares,11
+253,Turbot,Pleuronectidae,11
+254,"Turbot, curlfin",Pleuronichthys decurrens,7
+255,"Turbot, diamond",Hypsopsetta guttulata,3
+256,"Turbot, hornyhead",Pleuronichthys verticalis,6
+257,Wahoo,Acanthocybium solanderi,11
+258,"Whitefish, ocean",Caulolatilus princeps,11
+259,"Whiting, Pacific",Merluccius productus,11
+260,"Wrasse, rock",Halichoeres semicinctus,6
+261,Yellowtail,Seriola lalandi,11
+262,Zebraperch,Hermosilla azurea,2

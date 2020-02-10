@@ -1,0 +1,538 @@
+---
+title: 'Patricia: Grupos Funcionales'
+author: "Jorge Cornejo"
+date: "10/25/2018"
+output:
+  html_document:
+    highlight: haddock
+    number_sections: yes
+    theme: flatly
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+  html_notebook: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = T)
+knitr::opts_chunk$set(results = 'asis')
+knitr::opts_chunk$set(warning = TRUE)
+knitr::opts_chunk$set(message = TRUE)
+knitr::opts_chunk$set(fig.width  = 9)
+knitr::opts_chunk$set(fig.height = 6)
+```
+
+**Install rFishBase package**: This only need to be done once.
+```{r eval=F}
+remotes::install_github("ropensci/rfishbase")
+```
+
+```{r echo=F, warning=FALSE, results='hide', message=F}
+rm(list=ls())
+library(readxl)
+library(dplyr)
+library(tidyr)
+library(DT)
+require(rfishbase)
+require(FD) #This calculates functional diversity
+```
+
+# Read data and obtain Species Names
+
+## Data in Capturas
+
+```{r}
+capturas <- read.csv('Data/WCsurvey2.csv', stringsAsFactors = F)
+
+# Three bio geographic regions were defined using published literature suggesting potentially significant faunal changes within these regions (Gabriel 1982, Williams & Ralston 2002, Francis et al. 2009) The biogeographic regions are: south of Cape Mendocino, Cape Mendocino to Cape Blanco, north of Cape Blanco. For example abundant species as Pacific Cod '
+
+sppWC <- capturas %>%
+  filter(latitude_dd >34) %>% #consider 34 lat S that includes Santa Barbara port
+  filter(latitude_dd <40) %>%
+  filter(!year %in% c("1977","1980","1983","1986", "1989","1992", "1995", "1998", "1999", "2000", "2001", "2002")) %>%
+  filter(year > 2013) %>%  #I am analysing 10 years in WC 
+  select(scientific_name) %>%
+  group_by(scientific_name) %>%
+  summarise(n=n()) %>%
+  rename (cientifico = scientific_name)
+
+sppWC2 <- capturas %>%
+  filter(latitude_dd >34) %>% #consider 34 lat S that includes Santa Barbara port
+  filter(latitude_dd <40) %>%
+  filter(!year %in% c("1977","1980","1983","1986", "1989","1992", "1995", "1998", "1999", "2000", "2001", "2002")) %>%
+  filter(year > 2013)  #I am analysing 10 years in WC 
+
+  survey_min_depth <- sppWC2 %>% #looking at what depth will be more appropiate to cut the landings data based on what is sampled in surveys (the percentage of species in surveys at 20, 3, 40, 50, 60, 70, 80, 90, 100)
+  filter(depth_m < 70) %>% # trawling' hauls started al min depth of 60.7. Thus, in landings I deleted all species with depth ranges shallowed than 60.
+  select(depth_m) %>% 
+    mutate(min(depth_m))
+
+```
+
+
+## Get information from FishBase
+
+Fist we remove the non-fishes species.
+
+```{r cache=TRUE}
+fishbaseInfo1 <- species(sppWC$cientifico)
+fishbaseInfo2 <- left_join(sppWC, fishbaseInfo1, by=c("cientifico"="Species")) %>%
+  filter(SpecCode != "NA")
+
+sppDeepWC2 <- inner_join(sppWC, fishbaseInfo2, by = "cientifico") # getting traits from intersection with surveys traits
+
+temp <- ecology(sppDeepWC2$cientifico, fields=c("SpecCode", "DietTroph")) %>%
+    rename(TL=DietTroph)
+fishbaseInfo <- left_join(fishbaseInfo2, temp, by=c("SpecCode"="SpecCode")) #171 sp
+
+```
+
+## Cleanup the columns
+```{r}
+cData2 <- fishbaseInfo %>%
+  select(cientifico, TL, DemersPelag, DepthRangeShallow, DepthRangeDeep, Length, BodyShapeI) %>%
+  arrange(cientifico)
+
+#what_these_are_different <- anti_join(cData2, cData)#Caristius macropus, is because this sp doesn't have abundances in this area and cData have species from the survey that have abundances
+
+# cData <- fishbaseInfo %>%
+#   select(cientifico, TL, DemersPelag, DepthRangeShallow, DepthRangeDeep, Length, BodyShapeI) %>%
+#   arrange(cientifico)
+
+#cData1 <- cData[-58,]
+# #cData1 <- read.csv('Data/Derived/WC_survey_traits_0_600_35_40_final.csv') %>%
+#   mutate(cientifico = as.character(cientifico)) %>%
+#   mutate(TL = as.character(TL)) %>%
+#   mutate(DemersPelag = as.character(DemersPelag)) %>%
+#   mutate(DepthRangeShallow = as.character(DepthRangeShallow)) %>%
+#   mutate(DepthRangeDeep = as.character(DepthRangeDeep)) %>%
+#   mutate(Length = as.character(Length)) %>%
+#   mutate(BodyShapeI = as.character(BodyShapeI))
+
+#cData2 <- cData1
+ 
+#row.names(cData) <- cData$cientifico
+
+#cData2 <- read.csv('Data/Derived/WCsurveytraits2.csv', stringsAsFactors = F)
+#filter(cientifico != "Gadus macrocephalus" & TL != 4.16) #3.78)
+#cData <- cData[cData$cientifico!="Gadus macrocephalus" & cData$TL != 3.78,]
+```
+
+## Sum catches by Species and Year
+
+
+```{r}
+cD <- fishbaseInfo %>%
+  select(cientifico, TL, DemersPelag, DepthRangeShallow, DepthRangeDeep, Length, BodyShapeI) %>%
+  arrange(cientifico)
+
+cData3 <- cD %>%  
+  select(cientifico)
+
+yearCatch1 <- capturas %>%
+ # filter(depth_m < 600) %>% #AS IF THIS SHOULD BE A PROBLEM WHEN COMPARING WITH CHILE
+  filter(latitude_dd >34) %>%
+  filter(latitude_dd <40) %>%
+  filter(!year %in% c("1977","1980","1983","1986", "1989","1992", "1995", "1998", "1999", "2000", "2001", "2002")) %>%
+  filter(year < 2013) %>% #selecting years for the current trawling survey sampling 2003 - 2013(cite)
+  select(cpue_kg_per_ha_der, scientific_name, year) %>%
+  rename(captkg = cpue_kg_per_ha_der) %>%
+  rename(cientifico = scientific_name)
+
+yearCatch <- yearCatch1 %>%
+  select(year, cientifico, captkg) %>%
+  group_by(year, cientifico) %>%
+  summarise(totalCatch_kg = sum(captkg, na.rm=T)) %>%
+  #filter(cientifico %in% cData3$cientifico) %>%
+  arrange(cientifico, year)  
+
+
+
+yearCatch <- inner_join(yearCatch, cData3, by = "cientifico") %>%
+  select(year, cientifico, totalCatch_kg)
+
+# Deleting species with catch = 0 kg. in WCsurvey 
+
+cD <- fishbaseInfo %>%
+  select(cientifico, TL, DemersPelag, DepthRangeShallow, DepthRangeDeep, Length, BodyShapeI) %>%
+  arrange(cientifico)
+
+abundance2 <- yearCatch %>% 
+  select(cientifico) %>%
+  group_by(cientifico) %>%
+  summarise(n=n())
+  #distinct(cientifico, .keep_all = TRUE)
+
+cData <- left_join(abundance2, cD, by = 'cientifico') %>% 
+  select(-n)
+
+```
+
+
+
+```{r}
+cD3 <- fishbaseInfo %>%
+  select(cientifico, TL, DemersPelag, DepthRangeShallow, DepthRangeDeep, Length, BodyShapeI) %>%
+  arrange(cientifico)
+
+abundance3 <- yearCatch %>% 
+  select(cientifico) %>%
+  group_by(cientifico) %>%
+  summarise(n=n())
+  #distinct(cientifico, .keep_all = TRUE)
+
+cD4 <- left_join(abundance3, cD3, by = 'cientifico') %>% 
+  select(-n)
+
+# Survey_completed <- read.csv('Data/Derived/WC_survey_traits_0_600_35_40_final.csv', stringsAsFactors = F) %>% # this is the survey data completed with searched information, which for most sp were found in fishbase.
+#   mutate(TL = as.character(TL)) %>%
+#   mutate(DepthRangeShallow = as.character(DepthRangeShallow)) %>%
+#   mutate(DepthRangeDeep = as.character(DepthRangeDeep)) %>%
+#   mutate(Length = as.character(Length))
+
+Survey_completed <- read_xls('Data/Derived/test1.xls') %>% 
+  select(-...1)
+
+
+Survey <- cD4 %>%   
+  select(cientifico)
+
+cData <- left_join(Survey, Survey_completed, by ='cientifico')
+
+cData <- cData %>%
+  mutate(TL = as.double(TL)) %>%
+  mutate(DepthRangeDeep = as.numeric(DepthRangeDeep)) %>%
+  mutate(DepthRangeShallow = as.numeric(DepthRangeShallow))%>%
+  mutate(Length = as.numeric(Length))
+
+write.csv(cData, file="Data/Derived/WC_Survey_traits_completed.csv")# exported to fill NA's with info from scientific sources
+
+```
+
+
+## Turn into Wide format
+
+### Abundance Matrix
+This values are calculates as the sum of catches by species on a giver year.
+Then year is turn int a **row.name** and is drop from the columns.
+
+_Coelorhynchus aconcagua_ does not have any data, so we remove it from the table.
+
+```{r results="html"}
+abundances <- yearCatch %>%
+  spread(cientifico, totalCatch_kg) %>% 
+  select(-'Caristius macropus')
+
+row.names(abundances) <- abundances$year
+abundances <-  abundances[,-1] %>%
+  replace(., is.na(.), 0)
+
+
+temp <- as.data.frame(colSums(abundances))
+temp$names <- row.names(temp)
+temp2 <- temp[temp$`colSums(abundances)`==0,]
+
+abundances <- abundances %>%
+  select(-c(temp2$names))
+
+cData <- cData %>% 
+  filter(cientifico!='Caristius macropus') %>% 
+  filter(!cientifico %in% temp2$names ) %>%
+  arrange(cientifico) 
+
+nameList <- cData$cientifico
+cData <- cData[,-1]
+row.names(cData) <- nameList
+
+testFDcommunity <- dbFD(cData, corr = "cailliez", a=abundances)
+datatable(data.frame(testFDcommunity[1:8]))
+datatable(testFDcommunity$CWM)
+
+# write.csv(cData, file="Data/Derived/WC_survey_traits.csv")
+# write.csv(abundances, file="Data/Derived/WC_survey_abundances.csv")
+# write.csv(testFDcommunity, file="Data/Derived/WC_survey_FD.csv")
+```
+
+
+```{r results="html"}
+abundances <- yearCatch %>%
+  spread(cientifico, totalCatch_kg)
+
+row.names(abundances) <- abundances$year
+abundances <-  abundances[,-1] %>%
+  replace(., is.na(.), 0)
+
+
+temp <- as.data.frame(colSums(abundances))
+temp$names <- row.names(temp)
+temp2 <- temp[temp$`colSums(abundances)`==0,]
+
+abundances <- abundances %>%
+  select(-c(temp2$names))
+
+Surveytraits_completed - Surveytraits_completed %>%
+  mutate(TL = as.double(TL)) %>%
+  mutate(DepthRangeDeep = as.numeric(DepthRangeDeep)) %>%
+  mutate(Length = as.numeric(Length))
+
+Surveytraits_completed <- Surveytraits_completed %>%
+  filter(!cientifico %in% temp2$names ) %>%
+  arrange(cientifico)
+
+nameList <- Surveytraits_completed$cientifico
+Surveytraits_completed <- Surveytraits_completed[,-1]
+row.names(Surveytraits_completed) <- nameList
+
+Surveytraits_completed2 - Surveytraits_completed %>%
+  mutate(TL = as.double(TL)) %>%
+  mutate(DepthRangeDeep = as.numeric(DepthRangeDeep)) %>%
+  mutate(Length = as.numeric(Length))
+
+
+testFDcommunity <- dbFD(Surveytraits_completed, corr = "cailliez", a=abundances)
+datatable(data.frame(testFDcommunity[1:8]))
+datatable(testFDcommunity$CWM)
+
+
+
+write.csv(Surveytraits_completed, file="Data/Derived/WC_survey_traits.csv")
+write.csv(abundances, file="Data/Derived/WC_survey_abundances.csv")
+write.csv(testFDcommunity, file="Data/Derived/WC_survey_FD.csv")
+```
+
+# Now working with Landings, check illegal fishing?
+
+
+```{r cache=TRUE}
+landings <- read.csv(file="Data/WClandings.csv", stringsAsFactors = F)
+```
+ 
+ 
+```{r}
+wc_landings <- landings %>%
+  rename(year=ï..year) %>% 
+  select(year, common, Fort.Bragg, Bodega.Bay, San.Francisco, Monterey, Morro.Bay, Santa.Barbara) %>%
+  filter(common != 'EMPTY') %>%
+  mutate( Fort.Bragg= as.numeric(Fort.Bragg)) %>%
+  mutate(Bodega.Bay = as.numeric(Bodega.Bay)) %>%
+  mutate(San.Francisco = as.numeric(San.Francisco)) %>%
+  mutate(Monterey = as.numeric(Monterey)) %>%
+  mutate(Morro.Bay = as.numeric(Morro.Bay)) %>%
+  mutate(Santa.Barbara = as.numeric(Santa.Barbara)) %>%
+  mutate(landings = Fort.Bragg+Bodega.Bay+San.Francisco+Monterey+Morro.Bay+Santa.Barbara) %>%
+  group_by(year, common) %>%
+  summarise(totalCatch = sum(landings, na.rm=T))
+
+write.csv(wc_landings, file="Data/Derived/WC_landings_common_name_all_years.csv")
+
+```
+
+Now prepare the **spNames** _dataset_ to get spepecies names for the species on **trawling** _dataset_.
+
+```{r}
+spNames <- capturas %>%
+  filter(latitude_dd >35) %>% #consider 34 lat S that includes Santa Barbara port
+  filter(latitude_dd <40) %>%
+  select(scientific_name, common_name) %>%
+  group_by(common_name, scientific_name) %>%
+  summarise(n=n()) %>%
+  rename (cientifico = scientific_name) %>%
+  rename (comun = common_name)
+
+spNames <- left_join(cData3, spNames) %>%
+  arrange(comun)
+
+write.csv(spNames, file="Data/Derived/WC_survey_common_scientific_name.csv")
+
+  # mutate(common=toupper(comun)) #other form to change name in dplyr
+```
+
+Merge **spNames** with **trawling** to add Species names.
+
+```{r}
+
+spTrawling <- wc_landings %>% # wc_landings_names was spTrawling 
+  group_by(common) %>%
+  summarise(n = n()) %>%
+  arrange(common)
+  
+write.csv(spTrawling, file="Data/Derived/WC_landings_common_name.csv")
+spTrawlingWithScName <- read.csv('Data/Derived/WC_landings_common_scientific_name.csv', stringsAsFactors = F)
+spTrawlingWithScName <-spTrawlingWithScName %>% 
+  distinct(cientifico, .keep_all = TRUE)
+
+```
+## Get data from FishBase
+
+### Traits Table
+
+Get FishBase data and then drop those that are not fishes of FB does not have data on them.
+Finally we only keep the columns that are needed for the analysis.
+
+This table are the input **traits** to the _FD_ functions.
+```{r cache=TRUE}
+
+fbSpTrawling1 <- species(spTrawlingWithScName$cientifico) #poner codigo a las sp que son marinas
+
+fbSpTrawling2 <- cbind(spTrawlingWithScName, fbSpTrawling1) %>% 
+arrange(cientifico)
+
+fbSpTrawling2$TL <- ecology(fbSpTrawling2$cientifico, fields=c("DietTroph"))$DietTroph[-58]  ## This get the Trophic Level from FB
+
+fbSpTrawling <- fbSpTrawling2 %>% 
+  filter(SpecCode !='NA')
+  
+
+# ecology(SpecCode=89, 3779, 2529, 3555) #Orthodon microlepidotus, Cebidichthys violaceus, Entosphenus tridentatus, Brama japonica
+# 
+# #Mycteroperca Epinephelus, Rhinobatos productus, Scomber Trachurus; are not in fishbase
+# 
+# filter(ecology(),SpecCode%in%c(10,2920))
+
+
+```
+
+#ASK FOR THE LIMIT OF THE DEPTH RANGE DEEP, AND FOR 
+THE pelagic-neritic AND pelagic-oceanic species.The survey trawling have species from these depths, thus, what could be better? I could focus only on demersal bathydemersal and reef associated fish or include others species that are represented in the survey that are pelagic neritic or oceanic. There are 119 sp in landings, 96 of them are not shared with the survey 
+
+
+
+```{r}
+fbSpTrawling <- fbSpTrawling %>%
+  select(cientifico, TL, DemersPelag, DepthRangeShallow, DepthRangeDeep, Length, BodyShapeI) %>%
+  arrange(cientifico) 
+
+Landingstraits <- fbSpTrawling %>%
+  filter(DemersPelag %in%c('demersal', 'bathydemersal', 'reef-associated'))   #without pelagic-neritic
+
+#Landingstraits2 <- fbSpTrawling %>%
+#  filter(DemersPelag %in%c('demersal', 'bathydemersal', 'reef-associated', 'pelagic-neritic')) #_with_pelagic_neritic 
+
+#PULL THE TRAITS FRON SURVEYS
+
+SpLanding_not_in_survey <- anti_join(Landingstraits, cData1, by='cientifico') 
+
+SpLanding_present_in_survey <- anti_join(Landingstraits, SpLanding_not_in_survey)
+
+SpLanding_present_in_survey2 <- anti_join(cData1, Landingstraits) 
+
+write.csv(Landingstraits3, file="Data/Derived/WC_landings_need_more_info.csv")
+#Landingstraits3 <- read.csv('Data/Derived/WC_landings_need_more_info.csv', stringsAsFactors = F)
+
+row.names(Landingstraits3) <- Landingstraits3$cientifico
+Ltraits <- Landingstraits3 %>%
+  select(-cientifico)
+
+datatable(Ltraits) 
+```
+
+Landings abundances
+```{r}
+spTrawlingWithScName_with_comma <- read.csv('Data/Derived/WC_landings_common_scientific_name_with_comma.csv', stringsAsFactors = F)
+
+surveytraits <- inner_join(spTrawlingWithScName_with_comma, Landingstraits, by = "cientifico") %>% 
+   distinct(cientifico, .keep_all = TRUE) %>% 
+  rename(common=comun)
+
+wc_landings
+
+```
+
+
+There are many species **without** scientific names, I used ssp datatable that contains all the common and cientific names from de surveys data.
+
+```{r}
+spp2 <- spp %>% #spp cientific and common names from surveys
+  rename(common = nombre_comun) %>%
+  select(common, cientifico) %>%
+  mutate(common=toupper(common)) %>%
+  filter(!common %in% c('GRANADERO ACONCAGUA'))
+# fixing names, thus it will match with landings data
+spp2$common <- gsub("MERLUZA COMÚN", "MERLUZA COMUN", spp2$common)
+spp2$common <- gsub("LENGUADO DE OJO GRANDE", "LENGUADO DE OJOS GRANDES", spp2$common)
+spp2$common <- gsub("RAYA VOLANTÍN", "RAYA VOLANTIN", spp2$common)
+spp2$common <- gsub("RAYA VOLANTÍN ESPINUDA", "RAYA ESPINOSA", spp2$common)
+spp2$common <- gsub("RAYA ELÉCTRICA", "RAYA ELECTRICA", spp2$common)
+spp2$common <- gsub("TIBURÓN VACA", "TIBURON FUME, GRIS", spp2$common)
+spp2$common <- gsub("GRANADERO COLA DE LÁTIGO", "GRANADERO COLA DE LATIGO", spp2$common)
+spp2$common <- gsub("TIBURÓN NEGRO NARIGÓN", "TIBURON NEGRO NARIGON", spp2$common)
+spp2$common <- gsub("TOLLO NARIGÓN", "TOLLO NARIGON", spp2$common)
+
+# merging surveys with landings data, thus all sp will have scientific name in sptrawling datatable: ej. LENGUADO DE OJOS GRANDES
+
+spTrawling2 <- spTrawling %>% # leaving only sp common names for to merge with survey sp common names
+     select(common)
+#intersecting survey and landings datatables by sp common names  
+landings_common_cientifico <- inner_join(spp2, spTrawling2, by = "common") %>%
+  filter(!cientifico %in% c('Hexanchus griseus')) %>%
+  filter(!cientifico %in% c('Merluccius australis')) %>%
+  filter(!cientifico %in% c('Psammobatis scobina'))
+ 
+landings_cientifico <- landings_common_cientifico %>%
+    select(cientifico)
+
+landingstraits <- inner_join(landings_cientifico, cData2, by = "cientifico") # getting traits from intersection with surveys traits
+
+row.names(landingstraits) <- landingstraits$cientifico
+traits <- landingstraits %>%
+  arrange(cientifico)
+
+ row.names(traits) <- traits$cientifico
+ traits <- traits %>%
+  select(-cientifico)
+
+ datatable(traits)
+ 
+# write.csv(traits, file="/Users/patri/Box Sync/Thesis/Chapter2/GruposFuncionales/Data/Derived/Traits_landings.csv")
+```
+
+## Get data from FishBase
+
+### Traits Table
+
+Get FishBase data and then drop those that are not fishes of FB does not have data on them.
+Finally we only keep the columns that are needed for the analysis.
+
+
+### Now format the landings
+
+```{r}
+trawling2 <- left_join(trawling, landings_common_cientifico, by=c("stock"="common"))
+abundances <- trawling2 %>%
+  filter(!is.na(cientifico), cientifico %in% row.names(traits)) %>%
+  select(-stock) %>%
+  spread(cientifico, totalCatch)
+
+row.names(abundances) <- abundances$year
+abundances <-  abundances[,-1] %>%
+  replace(., is.na(.), 0)
+```
+
+# FD derived from landings
+
+
+```{r}
+
+traits<- read.csv(file="Data/Derived/HC_traits_landings.csv")
+row.names(traits) <- traits$X
+
+#print(row.names(traits))
+
+abundances <-read.csv(file="Data/Derived/HC_abundance_landings.csv")
+
+abundances2 <- abundances[,-1]
+
+cNames <- data.frame(traits$X, names(abundances2))
+traits2 <- traits[,-1]
+row.names(traits2) <- names(abundances2)
+
+test <- dbFD(x=traits2, corr = "cailliez", a=abundances2)
+datatable(data.frame(test[1:8]))
+
+datatable(test$CWM)
+
+write.csv(test, file="C:/Users/patri/Box Sync/Thesis/Chapter2/Git_FD/GruposFuncionales/Data/Derived/HC_FD_landings_34_41.csv")
+write.csv(traits2, file="C:/Users/patri/Box Sync/Thesis/Chapter2/Git_FD/GruposFuncionales/Data/Derived/HC_FD_landings_traits_34_41.csv")
+write.csv(abundances2, file="C:/Users/patri/Box Sync/Thesis/Chapter2/Git_FD/GruposFuncionales/Data/Derived/HC_FD_landings_abundances_34_41.csv")
+
+```

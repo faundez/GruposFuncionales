@@ -1,0 +1,263 @@
+"","common","n"
+"1","Anchovy, deepbody",1
+"2","Anchovy, northern",12
+"3","Barracuda, California",12
+"4","Bass, barred sand",3
+"5","Bass, giant sea",12
+"6","Bass, kelp",5
+"7","Bass, spotted sand",1
+"8","Blackfish, Sacramento",1
+"9","Blacksmith",9
+"10","Bonito, Pacific",12
+"11","Bullhead, brown",3
+"12","Butterfish (Pacific pompano",4
+"13","Butterfish (Pacific pompano)",1
+"14","Butterfish (Pacific pompano)..",4
+"15","Butterfish (Pacific pompano)...",3
+"16","Cabezon",12
+"17","Carp",7
+"18","Cod, Pacific",5
+"19","Corbina, California",2
+"20","Corvina, shortfin",4
+"21","Croaker, black",1
+"22","Croaker, unspecifed",8
+"23","Croaker, white",12
+"24","Croaker, yellowfin",3
+"25","Dolphin (fish)",12
+"26","Eel",7
+"27","Eel, California moray",12
+"28","Eel, monkeyface (pricklebac",4
+"29","Eel, monkeyface (prickleback)",7
+"30","Eel, monkeyface (prickleback)..",1
+"31","Eel, spotted cusk-",1
+"32","Eel, wolf (wolf-eel)",3
+"33","Escolar",12
+"34","Fish, unspecified",12
+"35","Flounder, arrowtooth",12
+"36","Flounder, starry",12
+"37","Flounder, unspecified",12
+"38","Flyingfish",7
+"39","Goby, bluebanded",1
+"40","Goby, yellowfin",11
+"41","Greenling, kelp",12
+"42","Greenling, rock",5
+"43","Grenadier",12
+"44","Grouper",2
+"45","Grouper, broomtail",1
+"46","Grunion, California",1
+"47","Guitarfish, shovelnose",12
+"48","Hagfishes",11
+"49","Halfmoon",12
+"50","Halibut, California",12
+"51","Halibut, Pacific",7
+"52","Halibut, unspecified",3
+"53","Herring, Pacific",8
+"54","Herring, Pacific - roe",12
+"55","Herring, Pacific - roe on kel",2
+"56","Herring, Pacific - roe on kelp",4
+"57","Herring, Pacific - roe on kelp...",2
+"58","Jacks, unspecified",3
+"59","Jacksmelt",12
+"60","Kelpfish, giant",4
+"61","Kelpfishes",6
+"62","Lamprey, Pacific",1
+"63","Lingcod",12
+"64","Lizardfish, California",12
+"65","Louvar",12
+"66","Mackerel, bullet",1
+"67","Mackerel, jack",12
+"68","Mackerel, Pacific",12
+"69","Mackerel, unspecified",9
+"70","Midshipman, plainfin",10
+"71","Mudsucker, longjaw",6
+"72","Mullet, striped",1
+"73","Oilfish",10
+"74","Opah",12
+"75","Opaleye",12
+"76","Pomfret, Pacific",12
+"77","Queenfish",8
+"78","Ratfish, spotted",10
+"79","Ray, bat",12
+"80","Ray, Pacific electric",12
+"81","Ray, unspecified",12
+"82","Rockfish, aurora",12
+"83","Rockfish, bank",12
+"84","Rockfish, black",12
+"85","Rockfish, black-and-yellow",8
+"86","Rockfish, black-and-yellow.",4
+"87","Rockfish, blackgill",12
+"88","Rockfish, blue",12
+"89","Rockfish, bocaccio",12
+"90","Rockfish, bronzespotted",6
+"91","Rockfish, brown",12
+"92","Rockfish, calico",2
+"93","Rockfish, canary",12
+"94","Rockfish, chameleon",4
+"95","Rockfish, chilipepper",12
+"96","Rockfish, China",12
+"97","Rockfish, copper",12
+"98","Rockfish, copper (whitebelly)..",1
+"99","Rockfish, cowcod",10
+"100","Rockfish, darkblotched",12
+"101","Rockfish, flag",12
+"102","Rockfish, gopher",12
+"103","Rockfish, grass",12
+"104","Rockfish, greenblotched",12
+"105","Rockfish, greenspotted",12
+"106","Rockfish, greenstriped",12
+"107","Rockfish, group black/blue",3
+"108","Rockfish, group black/blue..",1
+"109","Rockfish, group bocaccio/c",2
+"110","Rockfish, group bocaccio/chili.",1
+"111","Rockfish, group bolina",12
+"112","Rockfish, group canary/ver",1
+"113","Rockfish, group deep nearshor",1
+"114","Rockfish, group deep nearshore.",4
+"115","Rockfish, group deepwater reds",1
+"116","Rockfish, group deepwater reds..",1
+"117","Rockfish, group gopher",8
+"118","Rockfish, group nearshore",8
+"119","Rockfish, group nearshore...",4
+"120","Rockfish, group red",12
+"121","Rockfish, group rosefish",12
+"122","Rockfish, group shelf",12
+"123","Rockfish, group slope",12
+"124","Rockfish, group small",12
+"125","Rockfish, honeycomb",10
+"126","Rockfish, kelp",12
+"127","Rockfish, Mexican",9
+"128","Rockfish, olive",12
+"129","Rockfish, Pacific ocean per",4
+"130","Rockfish, Pacific ocean perch",4
+"131","Rockfish, Pacific ocean perch.",3
+"132","Rockfish, pink",5
+"133","Rockfish, pinkrose",4
+"134","Rockfish, quillback",12
+"135","Rockfish, redbanded",12
+"136","Rockfish, rosethorn",12
+"137","Rockfish, rosy",12
+"138","Rockfish, shortbelly",9
+"139","Rockfish, speckled",12
+"140","Rockfish, splitnose",12
+"141","Rockfish, squarespot",11
+"142","Rockfish, starry",12
+"143","Rockfish, stripetail",6
+"144","Rockfish, swordspine",4
+"145","Rockfish, treefish",12
+"146","Rockfish, unspecified",12
+"147","Rockfish, vermilion",12
+"148","Rockfish, widow",12
+"149","Rockfish, yelloweye",12
+"150","Rockfish, yellowtail",12
+"151","Sablefish",12
+"152","Sailfish",1
+"153","Salmon",5
+"154","Salmon, Chinook",12
+"155","Salmon, chum",1
+"156","Salmon, coho",1
+"157","Salmon, pink",1
+"158","Salmon, Roe (Chinook and Coh",1
+"159","Salmon, Roe (Chinook and Coho",1
+"160","Salmon, Roe (Chinook, Coho",4
+"161","Salmon, Roe (Chinook, Coho)",3
+"162","Salmon, Roe (Chinook, Coho).",1
+"163","Sanddab",12
+"164","Sanddab, longfin",3
+"165","Sanddab, Pacific",12
+"166","Sanddab, speckled",2
+"167","Sardine, juvenile",2
+"168","Sardine, Pacific",12
+"169","Sargo",12
+"170","Scorpionfish, California",12
+"171","Sculpin, staghorn",12
+"172","Seabass, white",12
+"173","Seaperch, striped",6
+"174","Senorita",6
+"175","Shad, American",5
+"176","Shad, threadfin",7
+"177","Shark, basking",1
+"178","Shark, bigeye thresher",11
+"179","Shark, blacktip",2
+"180","Shark, blue",9
+"181","Shark, brown smoothhound",8
+"182","Shark, brown smoothhound.",4
+"183","Shark, gray smoothhound",11
+"184","Shark, horn",11
+"185","Shark, leopard",12
+"186","Shark, Pacific angel",12
+"187","Shark, pelagic thresher",12
+"188","Shark, salmon",5
+"189","Shark, sevengill",12
+"190","Shark, shortfin mako",12
+"191","Shark, sixgill",8
+"192","Shark, smooth hammerhead",4
+"193","Shark, smooth hammerhead.",2
+"194","Shark, smooth hammerhead...",1
+"195","Shark, soupfin",12
+"196","Shark, spiny dogfish",12
+"197","Shark, swell",11
+"198","Shark, thresher",12
+"199","Shark, unspecified",12
+"200","Shark, white",10
+"201","Sharks, cow",3
+"202","Sheephead, California",12
+"203","Silversides",5
+"204","Skate, big",9
+"205","Skate, California",5
+"206","Skate, longnose",6
+"207","Skate, thornback",9
+"208","Skate, unspecified",12
+"209","Smelt, night",12
+"210","Smelt, surf",12
+"211","Smelts, true",8
+"212","Sole, bigmouth",2
+"213","Sole, butter",6
+"214","Sole, Dover",12
+"215","Sole, English",12
+"216","Sole, fantail",9
+"217","Sole, petrale",12
+"218","Sole, rex",12
+"219","Sole, rock",12
+"220","Sole, sand",12
+"221","Sole, slender",4
+"222","Sole, unspecified",12
+"223","Splittail",2
+"224","Stickleback, threespine",1
+"225","Stingray",12
+"226","Sunfish, ocean",4
+"227","Surfperch, barred",12
+"228","Surfperch, black",12
+"229","Surfperch, calico",7
+"230","Surfperch, pile",10
+"231","Surfperch, rainbow",11
+"232","Surfperch, redtail",12
+"233","Surfperch, rubberlip",12
+"234","Surfperch, shiner",9
+"235","Surfperch, unspecified",12
+"236","Surfperch, walleye",10
+"237","Surfperch, white",3
+"238","Swordfish",12
+"239","Thornyhead, longspine",12
+"240","Thornyhead, shortspine",12
+"241","Thornyheads",12
+"242","Tomcod, Pacific",6
+"243","Topsmelt",4
+"244","Trawled fish, unspecified",5
+"245","Triggerfish",5
+"246","Tuna, albacore",11
+"247","Tuna, bigeye",11
+"248","Tuna, bluefin",11
+"249","Tuna, skipjack",11
+"250","Tuna, skipjack, black",2
+"251","Tuna, unspecified",9
+"252","Tuna, yellowfin",11
+"253","Turbot",11
+"254","Turbot, curlfin",7
+"255","Turbot, diamond",3
+"256","Turbot, hornyhead",6
+"257","Wahoo",11
+"258","Whitefish, ocean",11
+"259","Whiting, Pacific",11
+"260","Wrasse, rock",6
+"261","Yellowtail",11
+"262","Zebraperch",2
