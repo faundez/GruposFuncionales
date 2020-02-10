@@ -1,0 +1,306 @@
+---
+title: 'Patricia: Grupos Funcionales'
+author: "Jorge Cornejo"
+date: "10/25/2018"
+output:
+  html_document:
+    highlight: haddock
+    number_sections: yes
+    theme: flatly
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+  html_notebook: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = T)
+knitr::opts_chunk$set(results = 'asis')
+knitr::opts_chunk$set(warning = TRUE)
+knitr::opts_chunk$set(message = TRUE)
+knitr::opts_chunk$set(fig.width  = 9)
+knitr::opts_chunk$set(fig.height = 6)
+```
+
+**Install rFishBase package**: This only need to be done once.
+```{r eval=F}
+remotes::install_github("ropensci/rfishbase")
+```
+
+```{r echo=F, warning=FALSE, results='hide', message=F}
+rm(list=ls())
+library(readxl)
+library(dplyr)
+library(tidyr)
+library(DT)
+require(rfishbase)
+require(FD) #This calculates functional diversity
+```
+
+# Read data and obtain Species Names
+
+## Data in Capturas
+
+```{r}
+capturas <- read.csv('Data/WCsurvey2.csv', stringsAsFactors = F)
+
+# Three bio geographic regions were defined using published literature suggesting potentially significant faunal changes within these regions (Gabriel 1982, Williams & Ralston 2002, Francis et al. 2009) The biogeographic regions are: south of Cape Mendocino, Cape Mendocino to Cape Blanco, north of Cape Blanco. For example abundant species as Pacific Cod '
+
+sppWC <- capturas %>%
+  filter(latitude_dd >34) %>% #consider 34 lat S that includes Santa Barbara port
+  filter(latitude_dd <40) %>%
+  filter(!year %in% c("1977","1980","1983","1986", "1989","1992", "1995", "1998", "1999", "2000", "2001", "2002")) %>%
+  filter(year > 2013) %>%  #I am analysing 10 years in WC 
+  select(scientific_name) %>%
+  group_by(scientific_name) %>%
+  summarise(n=n()) %>%
+  rename (cientifico = scientific_name)
+
+sppWC2 <- capturas %>%
+  filter(latitude_dd >34) %>% #consider 34 lat S that includes Santa Barbara port
+  filter(latitude_dd <40) %>%
+  filter(!year %in% c("1977","1980","1983","1986", "1989","1992", "1995", "1998", "1999", "2000", "2001", "2002")) %>%
+  filter(year > 2013)  #I am analysing 10 years in WC 
+
+  survey_min_depth <- sppWC2 %>% #looking at what depth will be more appropiate to cut the landings data based on what is sampled in surveys (the percentage of species in surveys at 20, 3, 40, 50, 60, 70, 80, 90, 100)
+  filter(depth_m < 70) %>% # trawling' hauls started al min depth of 60.7. Thus, in landings I deleted all species with depth ranges shallowed than 60.
+  select(depth_m) %>% 
+    mutate(min(depth_m))
+
+```
+
+
+## Get information from FishBase
+
+Fist we remove the non-fishes species.
+
+```{r cache=TRUE}
+fishbaseInfo1 <- species(sppWC$cientifico)
+fishbaseInfo2 <- left_join(sppWC, fishbaseInfo1, by=c("cientifico"="Species")) %>%
+  filter(SpecCode != "NA")
+
+sppDeepWC2 <- inner_join(sppWC, fishbaseInfo2, by = "cientifico") # getting traits from intersection with surveys traits
+
+temp <- ecology(sppDeepWC2$cientifico, fields=c("SpecCode", "DietTroph")) %>%
+    rename(TL=DietTroph)
+fishbaseInfo <- left_join(fishbaseInfo2, temp, by=c("SpecCode"="SpecCode")) #171 sp
+
+```
+
+## Cleanup the columns
+```{r}
+cData2 <- fishbaseInfo %>%
+  select(cientifico, TL, DemersPelag, DepthRangeShallow, DepthRangeDeep, Length, BodyShapeI) %>%
+  arrange(cientifico)
+
+#what_these_are_different <- anti_join(cData2, cData)#Caristius macropus, is because this sp doesn't have abundances in this area and cData have species from the survey that have abundances
+
+# cData <- fishbaseInfo %>%
+#   select(cientifico, TL, DemersPelag, DepthRangeShallow, DepthRangeDeep, Length, BodyShapeI) %>%
+#   arrange(cientifico)
+
+#cData1 <- cData[-58,]
+# #cData1 <- read.csv('Data/Derived/WC_survey_traits_0_600_35_40_final.csv') %>%
+#   mutate(cientifico = as.character(cientifico)) %>%
+#   mutate(TL = as.character(TL)) %>%
+#   mutate(DemersPelag = as.character(DemersPelag)) %>%
+#   mutate(DepthRangeShallow = as.character(DepthRangeShallow)) %>%
+#   mutate(DepthRangeDeep = as.character(DepthRangeDeep)) %>%
+#   mutate(Length = as.character(Length)) %>%
+#   mutate(BodyShapeI = as.character(BodyShapeI))
+
+#cData2 <- cData1
+ 
+#row.names(cData) <- cData$cientifico
+
+#cData2 <- read.csv('Data/Derived/WCsurveytraits2.csv', stringsAsFactors = F)
+#filter(cientifico != "Gadus macrocephalus" & TL != 4.16) #3.78)
+#cData <- cData[cData$cientifico!="Gadus macrocephalus" & cData$TL != 3.78,]
+```
+
+## Sum catches by Species and Year
+
+
+```{r}
+cD <- fishbaseInfo %>%
+  select(cientifico, TL, DemersPelag, DepthRangeShallow, DepthRangeDeep, Length, BodyShapeI) %>%
+  arrange(cientifico)
+
+cData3 <- cD %>%  
+  select(cientifico)
+
+yearCatch1 <- capturas %>%
+ # filter(depth_m < 600) %>% #AS IF THIS SHOULD BE A PROBLEM WHEN COMPARING WITH CHILE
+  filter(latitude_dd >34) %>%
+  filter(latitude_dd <40) %>%
+  filter(!year %in% c("1977","1980","1983","1986", "1989","1992", "1995", "1998", "1999", "2000", "2001", "2002")) %>%
+  filter(year < 2013) %>% #selecting years for the current trawling survey sampling 2003 - 2013(cite)
+  select(cpue_kg_per_ha_der, scientific_name, year) %>%
+  rename(captkg = cpue_kg_per_ha_der) %>%
+  rename(cientifico = scientific_name)
+
+yearCatch <- yearCatch1 %>%
+  select(year, cientifico, captkg) %>%
+  group_by(year, cientifico) %>%
+  summarise(totalCatch_kg = sum(captkg, na.rm=T)) %>%
+  #filter(cientifico %in% cData3$cientifico) %>%
+  arrange(cientifico, year)  
+
+
+
+yearCatch <- inner_join(yearCatch, cData3, by = "cientifico") %>%
+  select(year, cientifico, totalCatch_kg)
+
+# Deleting species with catch = 0 kg. in WCsurvey 
+
+cD <- fishbaseInfo %>%
+  select(cientifico, TL, DemersPelag, DepthRangeShallow, DepthRangeDeep, Length, BodyShapeI) %>%
+  arrange(cientifico)
+
+abundance2 <- yearCatch %>% 
+  select(cientifico) %>%
+  group_by(cientifico) %>%
+  summarise(n=n())
+  #distinct(cientifico, .keep_all = TRUE)
+
+cData <- left_join(abundance2, cD, by = 'cientifico') %>% 
+  select(-n)
+
+```
+
+
+
+```{r}
+cD3 <- fishbaseInfo %>%
+  select(cientifico, TL, DemersPelag, DepthRangeShallow, DepthRangeDeep, Length, BodyShapeI) %>%
+  arrange(cientifico)
+
+abundance3 <- yearCatch %>% 
+  select(cientifico) %>%
+  group_by(cientifico) %>%
+  summarise(n=n())
+  #distinct(cientifico, .keep_all = TRUE)
+
+cD4 <- left_join(abundance3, cD3, by = 'cientifico') %>% 
+  select(-n)
+
+# Survey_completed <- read.csv('Data/Derived/WC_survey_traits_0_600_35_40_final.csv', stringsAsFactors = F) %>% # this is the survey data completed with searched information, which for most sp were found in fishbase.
+#   mutate(TL = as.character(TL)) %>%
+#   mutate(DepthRangeShallow = as.character(DepthRangeShallow)) %>%
+#   mutate(DepthRangeDeep = as.character(DepthRangeDeep)) %>%
+#   mutate(Length = as.character(Length))
+
+Survey_completed <- read_xls('Data/Derived/test1.xls') %>% 
+  select(-...1)
+
+
+Survey <- cD4 %>%   
+  select(cientifico)
+
+cData <- left_join(Survey, Survey_completed, by ='cientifico')
+
+cData <- cData %>%
+  mutate(TL = as.double(TL)) %>%
+  mutate(DepthRangeDeep = as.numeric(DepthRangeDeep)) %>%
+  mutate(DepthRangeShallow = as.numeric(DepthRangeShallow))%>%
+  mutate(Length = as.numeric(Length))
+
+write.csv(cData, file="Data/Derived/WC_Survey_traits_completed.csv")# exported to fill NA's with info from scientific sources
+
+```
+
+
+## Turn into Wide format
+
+### Abundance Matrix
+This values are calculates as the sum of catches by species on a giver year.
+Then year is turn int a **row.name** and is drop from the columns.
+
+_Coelorhynchus aconcagua_ does not have any data, so we remove it from the table.
+
+```{r results="html"}
+abundances <- yearCatch %>%
+  spread(cientifico, totalCatch_kg) %>% 
+  select(-'Caristius macropus')
+
+row.names(abundances) <- abundances$year
+abundances <-  abundances[,-1] %>%
+  replace(., is.na(.), 0)
+
+
+temp <- as.data.frame(colSums(abundances))
+temp$names <- row.names(temp)
+temp2 <- temp[temp$`colSums(abundances)`==0,]
+
+abundances <- abundances %>%
+  select(-c(temp2$names))
+
+cData <- cData %>% 
+  filter(cientifico!='Caristius macropus') %>% 
+  filter(!cientifico %in% temp2$names ) %>%
+  arrange(cientifico) %>% 
+  mutate(DemersPelag=as.factor(DemersPelag), BodyShapeI = as.factor(BodyShapeI))
+
+
+nameList <- cData$cientifico
+cData <- cData[,-1]
+row.names(cData) <- nameList
+
+testFDcommunity <- dbFD(cData, corr = "cailliez", a=abundances)
+datatable(data.frame(testFDcommunity[1:8]))
+datatable(testFDcommunity$CWM)
+
+# write.csv(cData, file="Data/Derived/WC_survey_traits.csv")
+# write.csv(abundances, file="Data/Derived/WC_survey_abundances.csv")
+# write.csv(testFDcommunity, file="Data/Derived/WC_survey_FD.csv")
+```
+
+
+```{r results="html"}
+abundances <- yearCatch %>%
+  spread(cientifico, totalCatch_kg)
+
+row.names(abundances) <- abundances$year
+abundances <-  abundances[,-1] %>%
+  replace(., is.na(.), 0)
+
+
+temp <- as.data.frame(colSums(abundances))
+temp$names <- row.names(temp)
+temp2 <- temp[temp$`colSums(abundances)`==0,]
+
+abundances <- abundances %>%
+  select(-c(temp2$names))
+
+Surveytraits_completed - Surveytraits_completed %>%
+  mutate(TL = as.double(TL)) %>%
+  mutate(DepthRangeDeep = as.numeric(DepthRangeDeep)) %>%
+  mutate(Length = as.numeric(Length))
+
+Surveytraits_completed <- Surveytraits_completed %>%
+  filter(!cientifico %in% temp2$names ) %>%
+  arrange(cientifico)
+
+nameList <- Surveytraits_completed$cientifico
+Surveytraits_completed <- Surveytraits_completed[,-1]
+row.names(Surveytraits_completed) <- nameList
+
+Surveytraits_completed2 - Surveytraits_completed %>%
+  mutate(TL = as.double(TL)) %>%
+  mutate(DepthRangeDeep = as.numeric(DepthRangeDeep)) %>%
+  mutate(Length = as.numeric(Length))
+
+
+testFDcommunity <- dbFD(Surveytraits_completed, corr = "cailliez", a=abundances)
+datatable(data.frame(testFDcommunity[1:8]))
+datatable(testFDcommunity$CWM)
+
+
+
+write.csv(Surveytraits_completed, file="Data/Derived/WC_survey_traits.csv")
+write.csv(abundances, file="Data/Derived/WC_survey_abundances.csv")
+write.csv(testFDcommunity, file="Data/Derived/WC_survey_FD.csv")
+```
+
+# Now working with Landings, check illegal fishing?
+
