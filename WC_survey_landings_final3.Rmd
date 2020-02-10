@@ -224,7 +224,6 @@ temp2 <- temp[temp$`colSums(abundances)`==0,]
 abundances <- abundances %>%
   select(-c(temp2$names))
 
-
 cData <- cData %>%
   filter(!cientifico %in% temp2$names ) %>%
   arrange(cientifico)
@@ -232,6 +231,8 @@ cData <- cData %>%
 nameList <- cData$cientifico
 cData <- cData[,-1]
 row.names(cData) <- nameList
+cData$BodyShapeI <- as.factor(cData$BodyShapeI)
+
 
 # testFDcommunity <- dbFD(cData, corr = "cailliez", a=abundances)
 # datatable(data.frame(testFDcommunity[1:8]))
@@ -414,27 +415,9 @@ datatable(test$CWM)
 
 
 ```{r}
-# 
-# traits<- read.csv(file="Data/Derived/HC_traits_landings.csv")
-# row.names(traits) <- traits$X
-# 
-# #print(row.names(traits))
-# 
-# abundances <-read.csv(file="Data/Derived/HC_abundance_landings.csv")
-# 
-# abundances2 <- abundances[,-1]
-# 
-#cNames <- data.frame(Ltraits$X, names(abundancesL))
-Ltraits2 <- Ltraits[,-1]
-row.names(Ltraits2) <- names(abundancesL)
 
-test <- dbFD(x=Ltraits2, corr = "cailliez", a=abundancesL)
-datatable(data.frame(test[1:8]))
-
-datatable(test$CWM)
-
-write.csv(test, file="C:/Users/patri/Box Sync/Thesis/Chapter2/Git_FD/GruposFuncionales/Data/Derived/HC_FD_landings_34_41.csv")
-write.csv(traits2, file="C:/Users/patri/Box Sync/Thesis/Chapter2/Git_FD/GruposFuncionales/Data/Derived/HC_FD_landings_traits_34_41.csv")
-write.csv(abundances2, file="C:/Users/patri/Box Sync/Thesis/Chapter2/Git_FD/GruposFuncionales/Data/Derived/HC_FD_landings_abundances_34_41.csv")
+write.csv(test, file="C:/Users/patri/Box Sync/Thesis/Chapter2/Git_FD/GruposFuncionales/Data/Derived/WC_landings_abundances.csv")
+write.csv(traits2, file="C:/Users/patri/Box Sync/Thesis/Chapter2/Git_FD/GruposFuncionales/Data/Derived/WC_landings_traits.csv")
+write.csv(abundances2, file="C:/Users/patri/Box Sync/Thesis/Chapter2/Git_FD/GruposFuncionales/Data/Derived/WC_landings_FD.csv")
 
 ```
