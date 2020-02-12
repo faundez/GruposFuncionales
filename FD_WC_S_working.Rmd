@@ -1,0 +1,460 @@
+---
+title: 'Patricia: Grupos Funcionales'
+author: "Jorge Cornejo"
+date: "10/25/2018"
+output:
+  html_document:
+    highlight: haddock
+    number_sections: yes
+    theme: flatly
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+  html_notebook: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = T)
+knitr::opts_chunk$set(results = 'asis')
+knitr::opts_chunk$set(warning = TRUE)
+knitr::opts_chunk$set(message = TRUE)
+knitr::opts_chunk$set(fig.width  = 9)
+knitr::opts_chunk$set(fig.height = 6)
+```
+
+**Install rFishBase package**: This only need to be done once.
+```{r eval=F}
+remotes::install_github("ropensci/rfishbase")
+```
+
+```{r echo=F, warning=FALSE, results='hide', message=F}
+rm(list=ls())
+library(readxl)
+library(dplyr)
+library(tidyr)
+library(DT)
+require(rfishbase)
+require(FD) #This calculates functional diversity
+```
+
+# Read data and obtain Species Names
+
+## Data in Capturas
+
+```{r}
+capturas <- read.csv('Data/WCsurvey2.csv', stringsAsFactors = F)
+
+# Three bio geographic regions were defined using published literature suggesting potentially significant faunal changes within these regions (Gabriel 1982, Williams & Ralston 2002, Francis et al. 2009) The biogeographic regions are: south of Cape Mendocino, Cape Mendocino to Cape Blanco, north of Cape Blanco. For example abundant species as Pacific Cod '
+
+sppWC <- capturas %>%
+  filter(latitude_dd >34) %>% #consider 34 lat S that includes Santa Barbara port
+  filter(latitude_dd <40) %>%
+  filter(!year %in% c("1977","1980","1983","1986", "1989","1992", "1995", "1998", "1999", "2000", "2001", "2002")) %>%
+  filter(year > 2013) %>%  #I am analysing 10 years in WC 
+  select(scientific_name) %>%
+  group_by(scientific_name) %>%
+  summarise(n=n()) %>%
+  rename (cientifico = scientific_name)
+
+sppWC2 <- capturas %>%
+  filter(latitude_dd >34) %>% #consider 34 lat S that includes Santa Barbara port
+  filter(latitude_dd <40) %>%
+  filter(!year %in% c("1977","1980","1983","1986", "1989","1992", "1995", "1998", "1999", "2000", "2001", "2002")) %>%
+  filter(year > 2013)  #I am analysing 10 years in WC 
+
+  survey_min_depth <- sppWC2 %>% #looking at what depth will be more appropiate to cut the landings data based on what is sampled in surveys (the percentage of species in surveys at 20, 3, 40, 50, 60, 70, 80, 90, 100)
+  filter(depth_m < 70) %>% # trawling' hauls started al min depth of 60.7. Thus, in landings I deleted all species with depth ranges shallowed than 60.
+  select(depth_m) %>% 
+    mutate(min(depth_m))
+
+```
+
+
+## Get information from FishBase
+
+Fist we remove the non-fishes species.
+
+```{r cache=TRUE}
+fishbaseInfo1 <- species(sppWC$cientifico)
+fishbaseInfo2 <- left_join(sppWC, fishbaseInfo1, by=c("cientifico"="Species")) %>%
+  filter(SpecCode != "NA")
+
+sppDeepWC2 <- inner_join(sppWC, fishbaseInfo2, by = "cientifico") # getting traits from intersection with surveys traits
+
+temp <- ecology(sppDeepWC2$cientifico, fields=c("SpecCode", "DietTroph")) %>%
+    rename(TL=DietTroph)
+fishbaseInfo <- left_join(fishbaseInfo2, temp, by=c("SpecCode"="SpecCode")) #171 sp
+
+```
+
+## Cleanup the columns
+```{r}
+cData2 <- fishbaseInfo %>%
+  select(cientifico, TL, DemersPelag, DepthRangeShallow, DepthRangeDeep, Length, BodyShapeI) %>%
+  arrange(cientifico)
+
+#what_these_are_different <- anti_join(cData2, cData)#Caristius macropus, is because this sp doesn't have abundances in this area and cData have species from the survey that have abundances
+
+# cData <- fishbaseInfo %>%
+#   select(cientifico, TL, DemersPelag, DepthRangeShallow, DepthRangeDeep, Length, BodyShapeI) %>%
+#   arrange(cientifico)
+
+#cData1 <- cData[-58,]
+# #cData1 <- read.csv('Data/Derived/WC_survey_traits_0_600_35_40_final.csv') %>%
+#   mutate(cientifico = as.character(cientifico)) %>%
+#   mutate(TL = as.character(TL)) %>%
+#   mutate(DemersPelag = as.character(DemersPelag)) %>%
+#   mutate(DepthRangeShallow = as.character(DepthRangeShallow)) %>%
+#   mutate(DepthRangeDeep = as.character(DepthRangeDeep)) %>%
+#   mutate(Length = as.character(Length)) %>%
+#   mutate(BodyShapeI = as.character(BodyShapeI))
+
+#cData2 <- cData1
+ 
+#row.names(cData) <- cData$cientifico
+
+#cData2 <- read.csv('Data/Derived/WCsurveytraits2.csv', stringsAsFactors = F)
+#filter(cientifico != "Gadus macrocephalus" & TL != 4.16) #3.78)
+#cData <- cData[cData$cientifico!="Gadus macrocephalus" & cData$TL != 3.78,]
+```
+
+## Sum catches by Species and Year
+
+
+```{r}
+cD <- fishbaseInfo %>%
+  select(cientifico, TL, DemersPelag, DepthRangeShallow, DepthRangeDeep, Length, BodyShapeI) %>%
+  arrange(cientifico)
+
+cData3 <- cD %>%  
+  select(cientifico)
+
+yearCatch1 <- capturas %>%
+ # filter(depth_m < 600) %>% #AS IF THIS SHOULD BE A PROBLEM WHEN COMPARING WITH CHILE
+  filter(latitude_dd >34) %>%
+  filter(latitude_dd <40) %>%
+  filter(!year %in% c("1977","1980","1983","1986", "1989","1992", "1995", "1998", "1999", "2000", "2001", "2002")) %>%
+  filter(year < 2013) %>% #selecting years for the current trawling survey sampling 2003 - 2013(cite)
+  select(cpue_kg_per_ha_der, scientific_name, year) %>%
+  rename(captkg = cpue_kg_per_ha_der) %>%
+  rename(cientifico = scientific_name)
+
+yearCatch <- yearCatch1 %>%
+  select(year, cientifico, captkg) %>%
+  group_by(year, cientifico) %>%
+  summarise(totalCatch_kg = sum(captkg, na.rm=T)) %>%
+  #filter(cientifico %in% cData3$cientifico) %>%
+  arrange(cientifico, year)  
+
+
+
+yearCatch <- inner_join(yearCatch, cData3, by = "cientifico") %>%
+  select(year, cientifico, totalCatch_kg)
+
+# Deleting species with catch = 0 kg. in WCsurvey 
+
+cD <- fishbaseInfo %>%
+  select(cientifico, TL, DemersPelag, DepthRangeShallow, DepthRangeDeep, Length, BodyShapeI) %>%
+  arrange(cientifico)
+
+abundance2 <- yearCatch %>% 
+  select(cientifico) %>%
+  group_by(cientifico) %>%
+  summarise(n=n())
+  #distinct(cientifico, .keep_all = TRUE)
+
+cData <- left_join(abundance2, cD, by = 'cientifico') %>% 
+  select(-n)
+
+```
+
+
+
+```{r}
+cD3 <- fishbaseInfo %>%
+  select(cientifico, TL, DemersPelag, DepthRangeShallow, DepthRangeDeep, Length, BodyShapeI) %>%
+  arrange(cientifico)
+
+abundance3 <- yearCatch %>% 
+  select(cientifico) %>%
+  group_by(cientifico) %>%
+  summarise(n=n())
+  #distinct(cientifico, .keep_all = TRUE)
+
+cD4 <- left_join(abundance3, cD3, by = 'cientifico') %>% 
+  select(-n)
+
+Survey_completed <- read.csv('Data/Derived/WC_survey_traits_0_600_35_40_final.csv', stringsAsFactors = F) %>% # this is the survey data completed with searched information, which for most sp were found in fishbase.
+  mutate(TL = as.character(TL)) %>%
+  mutate(DepthRangeShallow = as.character(DepthRangeShallow)) %>%
+  mutate(DepthRangeDeep = as.character(DepthRangeDeep)) %>%
+  mutate(Length = as.character(Length)) 
+
+Survey <- cD4 %>%   
+  select(cientifico)
+
+Surveytraits_completed <- left_join(Survey, Survey_completed, by ='cientifico')
+
+write.csv(Surveytraits_completed, file="Data/Derived/WC_Survey_traits_completed.csv")
+
+```
+
+
+## Turn into Wide format
+
+### Abundance Matrix
+This values are calculates as the sum of catches by species on a giver year.
+Then year is turn int a **row.name** and is drop from the columns.
+
+_Coelorhynchus aconcagua_ does not have any data, so we remove it from the table.
+
+```{r results="html"}
+abundances <- yearCatch %>%
+  spread(cientifico, totalCatch_kg)
+
+row.names(abundances) <- abundances$year
+abundances <-  abundances[,-1] %>%
+  replace(., is.na(.), 0)
+
+
+temp <- as.data.frame(colSums(abundances))
+temp$names <- row.names(temp)
+temp2 <- temp[temp$`colSums(abundances)`==0,]
+
+abundances <- abundances %>%
+  select(-c(temp2$names))
+
+cData <- cData %>%
+  filter(!cientifico %in% temp2$names ) %>%
+  arrange(cientifico)
+
+nameList <- cData$cientifico
+cData <- cData[,-1]
+row.names(cData) <- nameList
+cData$BodyShapeI <- as.factor(cData$BodyShapeI)
+
+
+# testFDcommunity <- dbFD(cData, corr = "cailliez", a=abundances)
+# datatable(data.frame(testFDcommunity[1:8]))
+# datatable(testFDcommunity$CWM)
+
+testFDcommunity <- dbFD(cData, corr = "cailliez", a=abundances)
+datatable(data.frame(testFDcommunity[1:8]))
+datatable(testFDcommunity$CWM)
+
+
+
+write.csv(cData, file="Data/Derived/WC_survey_traits.csv")
+write.csv(abundances, file="Data/Derived/WC_survey_abundances.csv")
+write.csv(testFDcommunity, file="Data/Derived/WC_survey_FD.csv")
+```
+
+
+# Now working with Landings, check illegal fishing?
+
+
+```{r cache=TRUE}
+landings <- read.csv(file="Data/WClandings.csv", stringsAsFactors = F)
+```
+ 
+ 
+```{r}
+wc_landings <- landings %>%
+  rename(year=ï..year) %>% 
+  select(year, common, Fort.Bragg, Bodega.Bay, San.Francisco, Monterey, Morro.Bay, Santa.Barbara) %>%
+  filter(common != 'EMPTY') %>%
+  mutate( Fort.Bragg= as.numeric(Fort.Bragg)) %>%
+  mutate(Bodega.Bay = as.numeric(Bodega.Bay)) %>%
+  mutate(San.Francisco = as.numeric(San.Francisco)) %>%
+  mutate(Monterey = as.numeric(Monterey)) %>%
+  mutate(Morro.Bay = as.numeric(Morro.Bay)) %>%
+  mutate(Santa.Barbara = as.numeric(Santa.Barbara)) %>%
+  mutate(landings = Fort.Bragg+Bodega.Bay+San.Francisco+Monterey+Morro.Bay+Santa.Barbara) %>%
+  group_by(year, common) %>%
+  summarise(totalCatch = sum(landings, na.rm=T))
+
+#write.csv(wc_landings, file="Data/Derived/WC_landings_common_name_all_years.csv")
+
+```
+
+Now prepare the **spNames** _dataset_ to get spepecies names for the species on **trawling** _dataset_.
+
+```{r}
+spNames <- capturas %>%
+  filter(latitude_dd >35) %>% #consider 34 lat S that includes Santa Barbara port
+  filter(latitude_dd <40) %>%
+  select(scientific_name, common_name) %>%
+  group_by(common_name, scientific_name) %>%
+  summarise(n=n()) %>%
+  rename (cientifico = scientific_name) %>%
+  rename (comun = common_name)
+
+spNames <- left_join(cData3, spNames) %>%
+  arrange(comun)
+
+#write.csv(spNames, file="Data/Derived/WC_survey_common_scientific_name.csv")
+
+```
+
+Merge **spNames** with **trawling** to add Species names.
+
+```{r}
+
+spTrawling <- wc_landings %>% 
+  group_by(common) %>%
+  summarise(n = n()) %>%
+  arrange(common)
+  
+write.csv(spTrawling, file="Data/Derived/WC_landings_common_name.csv")
+spTrawlingWithScName <- read.csv('Data/Derived/WC_landings_common_scientific_name.csv', stringsAsFactors = F)
+spTrawlingWithScName <-spTrawlingWithScName %>% 
+  distinct(cientifico, .keep_all = TRUE)
+
+```
+## Get data from FishBase
+
+### Traits Table
+
+Get FishBase data and then drop those that are not fishes of FB does not have data on them.
+Finally we only keep the columns that are needed for the analysis.
+
+This table are the input **traits** to the _FD_ functions.
+```{r cache=TRUE}
+
+fbSpTrawling1 <- species(spTrawlingWithScName$cientifico) #poner codigo a las sp que son marinas
+
+fbSpTrawling2 <- cbind(spTrawlingWithScName, fbSpTrawling1) %>% 
+arrange(cientifico)
+
+fbSpTrawling2$TL <- ecology(fbSpTrawling2$cientifico, fields=c("DietTroph"))$DietTroph[-58]  ## This get the Trophic Level from FB
+
+fbSpTrawling <- fbSpTrawling2 %>% 
+  filter(SpecCode !='NA')
+  
+```
+
+#ASK FOR THE LIMIT OF THE DEPTH RANGE DEEP, AND FOR 
+THE pelagic-neritic AND pelagic-oceanic species.The survey trawling have species from these depths, thus, what could be better? I could focus only on demersal bathydemersal and reef associated fish or include others species that are represented in the survey that are pelagic neritic or oceanic. There are 119 sp in landings, 96 of them are not shared with the survey 
+
+
+
+```{r}
+fbSpTrawling <- fbSpTrawling %>%
+  select(cientifico, TL, DemersPelag, DepthRangeShallow, DepthRangeDeep, Length, BodyShapeI) %>%
+  arrange(cientifico) 
+
+Landingstraits3 <- fbSpTrawling %>%
+  filter(DemersPelag %in%c('demersal', 'bathydemersal', 'reef-associated')) %>%  #without pelagic-neritic
+  mutate(TL = as.numeric(TL)) %>%
+  mutate(DepthRangeShallow = as.numeric(DepthRangeShallow)) %>%
+  mutate(DepthRangeDeep = as.numeric(DepthRangeDeep)) %>%
+  mutate(Length = as.numeric(Length)) %>% 
+  filter(DepthRangeDeep > 60)
+  
+  
+ LaTraits4 <- Landingstraits3 %>% 
+  filter(cientifico %in% c('Anoplopoma fimbria', 'Atractoscion nobilis', 'Beringraja rhina', 'Caulolatilus princeps', 'Cheilotrema saturnum', 'Chilara taylori', 'Eopsetta jordani', 'Hexagrammos decagrammus', 'Hippoglossina stomata', 'Leptocottus armatus', 'Lythrypnus dalli', 'Menticirrhus undulatus', 'Microstomus pacificus', 'Mycteroperca xenarcha', 'Oncorhynchus kisutch', 'Ophiodon elongatus', 'Oxyjulis californica', 'Paralabrax maculatofasciatus', 'Paralichthys californicus', 'Platichthys stellatus', 'Psettichthys melanostictus', 'Scorpaenichthys marmoratus', 'Sebastes auriculatus', 'Sebastes carnatus', 'Sebastes caurinus', 'Sebastes chrysomelas', 'Sebastes crameri', 'Sebastes goodei', 'Sebastes melanops', 'Sebastes melanostomus', 'Sebastes miniatus', 'Sebastes nebulosus', 'Sebastes rastrelliger', 'Sebastes rufus', 'Sebastolobus alascanus', 'Sebastolobus altivelis', 'Semicossyphus pulcher', 'Squatina californica', 'Stereolepis gigas', 'Squatina californica', 'Stereolepis gigas', 'Triakis semifasciata', 'Amphistichus argenteus', 'Atheresthes stomias', 'Carcharhinus limbatus', 'Citharichthys stigmaeus', 'Heterostichus rostratus', 'Oncorhynchus gorbuscha', 'Sebastes diploproa', 'Sebastes mystinus', 'Sebastes paucispinis', 'Sebastes phillipsi', 'Sebastes serriceps', 'Sebastes umbrosus', 'Seriphus politus', 'Cynoscion parvipinnis', 'Gadus macrocephalus', 'Hypsopsetta guttulata', 'Platyrhinoidis triseriata', 'Sebastes simulator')) %>% 
+   select(cientifico)
+ 
+    
+ LaTraits5 <- anti_join(Landingstraits3, LaTraits4)  
+   
+row.names(LaTraits5) <-  LaTraits5$cientifico
+Ltraits <-  LaTraits5 %>%
+  select(-cientifico)
+```
+
+Landings abundances
+```{r}
+spTrawlingWithScName_with_comma <- read.csv('Data/Derived/WC_landings_common_scientific_name_with_comma.csv', stringsAsFactors = F) 
+  
+spTrawlingWithScName_with_comma <- spTrawlingWithScName_with_comma %>% 
+  select(-X, -n) %>% 
+  rename(common=comun)
+
+Labundances <- left_join(wc_landings, spTrawlingWithScName_with_comma, by = "common") %>% 
+  select(-common) 
+
+Labundances2 <- Labundances %>% 
+  distinct(cientifico, .keep_all = TRUE) #elimina 4 sp repetidas
+
+```
+
+
+### Now format the landings
+
+```{r}
+abundancesL <- Labundances2 %>% #Cynoscion parvipinnis, Gadus macrocephalus, Hypsopsetta guttulata, Platyrhinoidis triseriata, Sebastes simulator, 
+   filter(!is.na(cientifico), cientifico %in% row.names(Ltraits)) %>%
+  spread(cientifico, totalCatch)
+
+row.names(abundancesL) <- abundancesL$year 
+abundancesL <-  abundancesL[,-1] %>%
+  replace(., is.na(.), 0)
+```
+
+# FD derived from landings
+
+```{r}
+traits <- anti_join(Landingstraits3, LaTraits4) %>% 
+  arrange(cientifico)
+
+#traits$cientifico <- row.names(traits)
+
+# traits <- traits %>%
+#   filter(cientifico %in% names(abundancesL))
+ 
+traits <- traits %>%
+   mutate(DemersPelag = as.factor(DemersPelag), BodyShapeI = as.factor(BodyShapeI))
+ 
+row.names(traits) <- traits$cientifico
+traits <- select(traits, -cientifico)
+
+test <- dbFD(traits, cor = "cailliez", a=abundancesL) #as the functional estimates don't work I eliminate all species with only one catch during the 10 years. Which I don't now if is right.
+datatable(data.frame(test[1:8]))
+datatable(test$CWM)
+```
+# Error when running with species that have been caught 1 time in the 10 years analyzed 
+Joining, by = "cientifico"
+Species x species distance matrix was not Euclidean. Cailliez correction was applied. 
+FRic: Dimensionality reduction was required. The last 47 PCoA axes (out of 77 in total) were removed. 
+FRic: Quality of the reduced-space representation (based on corrected distance matrix) = 0.6160421 
+ Show Traceback
+Error in convhulln(tr.FRic, "FA") : Received error code 4 from qhull. Qhull error: QH6235 qhull error (qh_memalloc): negative request size (-1432062184). Did int overflow due to high-D? While executing: | qhull FA Qt Options selected for Qhull 2015.2.r 2016/01/18: run-id 430704833 FArea-total Qtriangulate Qxact_merge _zero-centrum Q3-no-merge-vertices-dim-high _max-width 1.2 Error-roundoff 3.7e-014 _one-merge 2.3e-012 _near-inside 1.1e-011 Visible-distance 2.2e-013 U-coplanar-distance 2.2e-013 Width-outside 4.5e-013 _wide-facet 1.3e-012 Last point added to hull was p13. At error exit: Convex hull of 43 points in 30-d: Number of vertices: 41 Number of facets: 8475999 Statistics for: | qhull FA Qt Number of points processed: 41 Number of hyperplanes created: 11192844 
+
+
+#Species x species distance matrix was not Euclidean. Cailliez correction was applied. 
+FRic: Dimensionality reduction was required. The last 47 PCoA axes (out of 77 in total) were removed. 
+FRic: Quality of the reduced-space representation (based on corrected distance matrix) = 0.6160421 
+Error in convhulln(tr.FRic, "FA") : 
+  Received error code 4 from qhull. Qhull error:
+QH6235 qhull error (qh_memalloc): negative request size (-1432062184).  Did int overflow due to high-D?
+
+While executing:  | qhull FA  Qt
+Options selected for Qhull 2015.2.r 2016/01/18:
+  run-id 430704833  FArea-total  Qtriangulate  Qxact_merge  _zero-centrum
+  Q3-no-merge-vertices-dim-high  _max-width 1.2  Error-roundoff 3.7e-014
+  _one-merge 2.3e-012  _near-inside 1.1e-011  Visible-distance 2.2e-013
+  U-coplanar-distance 2.2e-013  Width-outside 4.5e-013  _wide-facet 1.3e-012
+Last point added to hull was p13.
+
+At error exit:
+
+Convex hull of 43 points in 30-d:
+
+  Number of vertices: 41
+  Number of facets: 8475999
+
+Statistics for:  | qhull FA  Qt
+
+  Number of points processed: 41
+  Number of hyperplanes created: 11192844
+  Number of distance tests for qhull: 5009399
+
+```{r}
+
+write.csv(test, file="C:/Users/patri/Box Sync/Thesis/Chapter2/Git_FD/GruposFuncionales/Data/Derived/WC_landings_abundances.csv")
+write.csv(traits, file="C:/Users/patri/Box Sync/Thesis/Chapter2/Git_FD/GruposFuncionales/Data/Derived/WC_landings_traits.csv")
+write.csv(abundancesL, file="C:/Users/patri/Box Sync/Thesis/Chapter2/Git_FD/GruposFuncionales/Data/Derived/WC_landings_FD.csv")
+
+```
